@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: selenosis-config
+  namespace: selenosis
+data:
+{{ (.Files.Glob "configmap/browsers.yaml").AsConfig | indent 2 }}

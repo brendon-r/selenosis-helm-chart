@@ -1,0 +1,79 @@
+# Default values for selenosis.
+# This is a YAML-formatted file.
+
+replicaCount: 1
+
+aks:
+  enabled: true
+  useInternalAzureLoadBalancer: "true"
+
+externalTrafficPolicy: "Cluster"
+
+autoscaling:
+  enabled: false
+  maxReplicas: 6
+  minReplicas: 1
+  targetCPUUtilizationPercentage: 40
+  stabilizationWindowInSeconds: 600
+  scaleDownPercentage: 50
+  scaleDownPeriodInSeconds: 30
+
+browserLimit: 200
+
+service:
+  port: 4444
+
+selenosisImage:
+  tag: "v1.0.5"
+  registry: "alcounit"
+  image: "selenosis"
+
+proxyImage:
+  tag: "v1.0.1"
+  registry: "alcounit"
+  image: "seleniferous"
+
+timeouts:
+  sessionWait: "300s"
+  browserWait: "300s"
+
+resources:
+  limits:
+    cpu: "1"
+    memory: "128Mi"
+  requests:
+    cpu: "0.4"
+    memory: "128Mi"
+
+selenoidUI:
+  enabled: true
+  image:
+    tag: "1.10.1"
+    registry: "aerokube"
+    image: "selenoid-ui"
+  resources:
+    limits:
+      cpu: "0.25"
+      memory: "64Mi"
+    requests:
+      cpu: "0.05"
+      memory: "64Mi"  
+
+selenoidUIAdapter:
+  image:
+    tag: "v0.0.2-develop"
+    image: "adaptee"
+    registry: "alcounit"
+  resources:
+    limits:
+      cpu: "0.25"
+      memory: "64Mi"
+    requests:
+      cpu: "0.05"
+      memory: "64Mi"  
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

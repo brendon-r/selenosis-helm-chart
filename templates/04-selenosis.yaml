@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: selenosis
+  namespace: selenosis
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end}}
+  selector:
+    matchLabels:
+      app: selenosis
+  template:
+    metadata:
+      labels:
+        app: selenosis
+        selenosis.app.type: worker
+      namespace: selenosis
+    spec:
+      containers:
+      - args: ["/selenosis", "--browsers-config", "./config/browsers.yaml", "--namespace", "selenosis", "--service-name", "seleniferous", "--browser-limit", "{{ .Values.browserLimit }}", "--proxy-image", "{{ .Values.proxyImage.registry }}/{{ .Values.proxyImage.image }}:{{ .Values.proxyImage.tag }}", "--session-wait-timeout", "{{ .Values.timeouts.sessionWait }}", "--browser-wait-timeout", "{{ .Values.timeouts.browserWait }}"]
+        image: {{ .Values.selenosisImage.registry }}/{{ .Values.selenosisImage.image }}:{{ .Values.selenosisImage.tag }}
+        name: selenosis
+        resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+        ports:
+        - containerPort: 4444
+          name: selenium
+          protocol: TCP
+        volumeMounts:
+        - mountPath: ./config
+          name: browsers-config
+        imagePullPolicy: IfNotPresent
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 4444
+          periodSeconds: 2
+          initialDelaySeconds: 3
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 4444
+          periodSeconds: 2
+          initialDelaySeconds: 3
+      volumes:
+      - name: browsers-config
+        configMap:
+          name: selenosis-config
